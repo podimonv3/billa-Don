@@ -236,23 +236,37 @@ async def start(client, message):
                     logger.exception(e)
                     f_caption=f_caption
             if f_caption is None:
-                f_cation = f"{title}"            
+                f_caption = f"{title}"
             try:
-                ok = await client.send_cached_media(
+                m=await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    protect_content=msg.get('protect', False)                
-                )                  
+                    protect_content=msg.get('protect', False),
+                    )
+   # Calculate deletion time in Asia/Kolkata timezone (IST, UTC+5:30)
+                kolkata_tz = pytz.timezone('Asia/Kolkata')
+                now = datetime.now(kolkata_tz)
+                delete_time = now + timedelta(minutes=10)
+                formatted_delete_time = delete_time.strftime("%d-%m-%Y %I:%M %p")  # Format: DD-MM-YYYY HH:MM AM/PM
+                
+                k = await client.send_message(
+                    chat_id=message.from_user.id,
+                    text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n⚠️ File will be deleted in 10 Mins\n🗑 Deleting at: {formatted_delete_time}\n\n📌 Save or forward it.</blockquote>"
+                )
+                await asyncio.sleep(600)
+                await m.delete()
+                await k.edit_text("<b>✅ Yᴏᴜʀ File ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ</b>") 
+                return
             except FloodWait as e:
                 await asyncio.sleep(e.x)
                 logger.warning(f"Floodwait of {e.x} sec.")
-                ok = await client.send_cached_media(
+                await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    protect_content=msg.get('protect', False)                    
-                )                    
+                    protect_content=msg.get('protect', False),
+                    )
             except Exception as e:
                 logger.warning(e, exc_info=True)
                 continue
@@ -271,12 +285,7 @@ async def start(client, message):
         diff = int(l_msg_id) - int(f_msg_id)
         async for msg in client.iter_messages(int(f_chat_id), int(l_msg_id), int(f_msg_id)):
             if msg.media:
-                if msg.media:
-    media_attr_name = msg.media.name.lower()  # Converts internal ENUM to 'photo', 'video', etc.
-    media = getattr(msg, media_attr_name, None)
-else:
-    media = None
-
+                media = getattr(msg, msg.media.value)
                 if BATCH_FILE_CAPTION:
                     try:
                         f_caption=BATCH_FILE_CAPTION.format(file_name=getattr(media, 'file_name', ''), file_size=getattr(media, 'file_size', ''), file_caption=getattr(msg, 'caption', ''))
@@ -284,7 +293,7 @@ else:
                         logger.exception(e)
                         f_caption = getattr(msg, 'caption', '')
                 else:
-                    media = getattr(msg, msg.media)
+                    media = getattr(msg, msg.media.value)
                     file_name = getattr(media, 'file_name', '')
                     f_caption = getattr(msg, 'caption', file_name)
                 try:
@@ -307,7 +316,8 @@ else:
                     logger.exception(e)
                     continue
             await asyncio.sleep(1) 
-        return await sts.delete()       
+        return await sts.delete()
+        
 
     files_ = await get_file_details(file_id)           
     if not files_:
@@ -318,14 +328,28 @@ else:
                 file_id=file_id,
                 protect_content=True if pre == 'filep' else False,
                 )
+   # Calculate deletion time in Asia/Kolkata timezone (IST, UTC+5:30)
+            kolkata_tz = pytz.timezone('Asia/Kolkata')
+            now = datetime.now(kolkata_tz)
+            delete_time = now + timedelta(minutes=10)
+            formatted_delete_time = delete_time.strftime("%d-%m-%Y %I:%M %p")  # Format: DD-MM-YYYY HH:MM AM/PM
+    
+            k = await client.send_message(
+                chat_id=message.from_user.id,
+                text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n⚠️ File will be deleted in 10 Mins\n🗑 Deleting at: {formatted_delete_time}\n\n📌 Save or forward it.</blockquote>"
+            )
+            await asyncio.sleep(600)
+            await m.delete()
+            await k.edit_text("<b>✅ Yᴏᴜʀ File ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ</b>") 
+            return
             filetype = msg.media
-            file = getattr(msg, filetype)
+            file = getattr(msg, filetype.value)
             title = file.file_name
             size=get_size(file.file_size)
             f_caption = f"<code>{title}</code>"
             if CUSTOM_FILE_CAPTION:
                 try:
-                    f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption, mention=message.from_user.mention)    
+                    f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='')
                 except:
                     return
             await msg.edit_caption(f_caption)
@@ -339,27 +363,34 @@ else:
     f_caption=files.caption
     if CUSTOM_FILE_CAPTION:
         try:
-            f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption, mention=message.from_user.mention)
+            f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
         except Exception as e:
             logger.exception(e)
-            f_caption = f_caption
-
+            f_caption=f_caption
     if f_caption is None:
-        f_caption = f"{title}"
-
-    xd = await client.send_cached_media(
+        f_caption = f"{files.file_name}"
+    m=await client.send_cached_media(
         chat_id=message.from_user.id,
         file_id=file_id,
         caption=f_caption,
         protect_content=True if pre == 'filep' else False,
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('🌀 ഉർവശി തീയറ്റേഴ്‌സ് 🌀', url='https://t.me/+RBNuafky0to1NDc1')            
-            ]])
-    )
-    k = await xd.reply(text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n📘ᴛʜɪs ᴍᴇssᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ɪɴ <b><u>10 mins</u> 🫥 <i></b>(ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs)</i>.\n\n<b><i>ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ.\n\n📘ഈ ഫയൽ 10 മിനുട്ടിനുള്ളിൽ ഇവിടെ നിന്നും ഡിലീറ്റ് ആകുന്നതാണ്... ഫയൽ എവിടെങ്കിലും Forward ചെയ്ത് Download ചെയ്യുക 🤌</i></b></blockquote>")
-    await asyncio.sleep(600)
-    await xd.delete()
-    await k.delete()
+        )
+    # Calculate deletion time in Asia/Kolkata timezone (IST, UTC+5:30)
+    kolkata_tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(kolkata_tz)
+    delete_time = now + timedelta(minutes=10)
+    formatted_delete_time = delete_time.strftime("%d-%m-%Y %I:%M %p")  # Format: DD-MM-YYYY HH:MM AM/PM 
     
+    k = await client.send_message(
+        chat_id=message.from_user.id,
+        text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n⚠️ File will be deleted in 10 Mins\n🗑 Deleting at: {formatted_delete_time}\n\n📌 Save or forward it.</blockquote>"
+    )         
+    await asyncio.sleep(600)
+    await m.delete()
+    await k.edit_text("<b>✅ Yᴏᴜʀ File ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ</b>") 
+    return     
+                    
+
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
            
