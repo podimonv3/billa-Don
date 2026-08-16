@@ -137,27 +137,45 @@ async def start(client, message):
                 should_run_check_loop_sub = True                      
         except Exception as e:
             print(e)
+                # ആദ്യം തന്നെ ഡിഫോൾട്ട് വാല്യൂസ് സെറ്റ് ചെയ്യുന്നു (എറർ വരാതിരിക്കാൻ)
+        pre = 'checksub' 
+        file_id = None 
+
         if message.command[1] != "subscribe":
             try:
                 kk, file_id = message.command[1].split("_", 1)
                 pre = 'checksubp' if kk == 'filep' else 'checksub' 
                 btn.append([InlineKeyboardButton("🔄 Try Again 🔄", callback_data=f"{pre}#{file_id}")])
             except (IndexError, ValueError):
+                # ഇവിടെ എറർ വന്നാൽ ഡിഫോൾട്ട് ആയി ആ വാല്യൂ എടുക്കും
+                if "_" in message.command[1]:
+                    try:
+                        _, file_id = message.command[1].split("_", 1)
+                    except ValueError:
+                        file_id = message.command[1]
+                else:
+                    file_id = message.command[1]
+                    
                 btn.append([InlineKeyboardButton("🔄 Try Again 🔄", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+        
         sh = await client.send_message(
             chat_id=message.from_user.id,
-            text="**♦️ 𝗥𝗘𝗔𝗗 𝗧𝗛𝗜𝗦 𝗜𝗡𝗦𝗧𝗥𝗨𝗖𝗧𝗜𝗢𝗡 ♦️\n\nനിങ്ങൾ ചോദിക്കുന്ന സിനിമകൾ ലഭിക്കണം എന്നുണ്ടെങ്കിൽ നിങ്ങൾ ഞങ്ങളുടെ ചാനലിൽ ജോയിൻ ചെയ്തിരിക്കണം. ജോയിൻ ചെയ്യാൻ 🚸 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ I🚸 &🚸 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ II🚸 എന്നീ ബട്ടണിൽ ക്ലിക്ക് ചെയ്യാവുന്നതാണ്.\n\nജോയിൻ ചെയ്ത ശേഷം 🔄 Try Again 🔄 എന്ന ബട്ടണിൽ അമർത്തിയാൽ നിങ്ങൾക്ക് ഞാൻ ആ സിനിമ അയച്ചു തരുന്നതാണ്..\n\nCLICK 🚸 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ I🚸 & 🚸 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ II🚸 AND THEN CLICK 🔄 Try Again 🔄 BUTTON TO GET MOVIE FILE **",
+            text="**♦️ 𝗥𝗘𝗔𝗗 𝗧𝗛𝗜𝗦 𝗜𝗡𝗦𝗧𝗥𝗨𝗖𝗧Ｉ𝗢𝗡 ♦️\n\nനിങ്ങൾ ചോദിക്കുന്ന സിനിമകൾ ലഭിക്കണം എന്നുണ്ടെങ്കിൽ നിങ്ങൾ ഞങ്ങളുടെ ചാനലിൽ ജോയിൻ ചെയ്തിരിക്കണം. ജോയിൻ ചെയ്യാൻ 🚸 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ I🚸 &🚸 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ II🚸 എന്നീ ബട്ടണിൽ ക്ലിക്ക് ചെയ്യാവുന്നതാണ്.\n\nജോയിൻ ചെയ്ത ശേഷം 🔄 Try Again 🔄 എന്ന ബട്ടണിൽ അമർത്തിയാൽ നിങ്ങൾക്ക് ഞാൻ ആ സിനിമ അയച്ചു തരുന്നതാണ്..\n\nCLICK 🚸 ᴊᴏɪɴ ᴄʜᴀɴណ𝗘𝗟 I rolls & 🚸 ᴊᴏɪɴ ᴄʜᴀɴណ𝗘𝗟 II rolls AND THEN CLICK 🔄 Try Again 🔄 BUTTON TO GET MOVIE FILE **",
             reply_markup=InlineKeyboardMarkup(btn),
             parse_mode=enums.ParseMode.MARKDOWN
-            )
+        )
+        
+        check = False # ഡിഫോൾട്ട് ആയി ചെക്ക് ഫാൾസ് ആക്കുന്നു
         if should_run_check_loop_sub:
             check = await check_loop_sub(client, message)
         elif should_run_check_loop_sub1:
             check = await check_loop_sub1(client, message)
+            
         if check:     
             await send_file(client, message, pre, file_id)
             await sh.delete()        
             return
+
         else:
             return False
 
