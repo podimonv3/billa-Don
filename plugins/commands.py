@@ -243,13 +243,7 @@ async def start(client, message):
                     file_id=msg.get("file_id"),
                     caption=f_caption,
                     protect_content=msg.get('protect', False),
-                    )
-   # Calculate deletion time in Asia/Kolkata timezone (IST, UTC+5:30)
-                kolkata_tz = pytz.timezone('Asia/Kolkata')
-                now = datetime.now(kolkata_tz)
-                delete_time = now + timedelta(minutes=10)
-                formatted_delete_time = delete_time.strftime("%d-%m-%Y %I:%M %p")  # Format: DD-MM-YYYY HH:MM AM/PM
-                
+                )               
                 k = await client.send_message(
                     chat_id=message.from_user.id,
                     text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n⚠️ File will be deleted in 10 Mins\n🗑 Deleting at: {formatted_delete_time}\n\n📌 Save or forward it.</blockquote>"
@@ -327,13 +321,7 @@ async def start(client, message):
                 chat_id=message.from_user.id,
                 file_id=file_id,
                 protect_content=True if pre == 'filep' else False,
-                )
-   # Calculate deletion time in Asia/Kolkata timezone (IST, UTC+5:30)
-            kolkata_tz = pytz.timezone('Asia/Kolkata')
-            now = datetime.now(kolkata_tz)
-            delete_time = now + timedelta(minutes=10)
-            formatted_delete_time = delete_time.strftime("%d-%m-%Y %I:%M %p")  # Format: DD-MM-YYYY HH:MM AM/PM
-    
+                )    
             k = await client.send_message(
                 chat_id=message.from_user.id,
                 text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n⚠️ File will be deleted in 10 Mins\n🗑 Deleting at: {formatted_delete_time}\n\n📌 Save or forward it.</blockquote>"
@@ -374,13 +362,7 @@ async def start(client, message):
         file_id=file_id,
         caption=f_caption,
         protect_content=True if pre == 'filep' else False,
-        )
-    # Calculate deletion time in Asia/Kolkata timezone (IST, UTC+5:30)
-    kolkata_tz = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(kolkata_tz)
-    delete_time = now + timedelta(minutes=10)
-    formatted_delete_time = delete_time.strftime("%d-%m-%Y %I:%M %p")  # Format: DD-MM-YYYY HH:MM AM/PM 
-    
+        )   
     k = await client.send_message(
         chat_id=message.from_user.id,
         text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n⚠️ File will be deleted in 10 Mins\n🗑 Deleting at: {formatted_delete_time}\n\n📌 Save or forward it.</blockquote>"
